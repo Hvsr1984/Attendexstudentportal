@@ -1,7 +1,8 @@
 {
   "version": 2,
   "services": {
-    "student-portal": {
+    "frontend": {
+      "root": "student-portal",
       "buildCommand": "npm run build",
       "outputDirectory": ".next",
       "installCommand": "npm install && npm install --no-save @tailwindcss/oxide lightningcss",
