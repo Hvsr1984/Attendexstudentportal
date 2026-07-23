@@ -10,6 +10,45 @@ import { Card, Button, Badge, Skeleton, Dialog, formatCurrency, formatDate } fro
 
 const API_BASE = "https://attendex-backend-api.vercel.app/api";
 
+function amountToWords(num: number): string {
+  const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
+  const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+  if (num === 0) return 'zero';
+
+  let n = Math.floor(num);
+  if (n < 0) return '';
+
+  let str = '';
+
+  if (n >= 10000000) {
+    str += amountToWords(Math.floor(n / 10000000)) + ' crore ';
+    n %= 10000000;
+  }
+  if (n >= 100000) {
+    str += amountToWords(Math.floor(n / 100000)) + ' lakh ';
+    n %= 100000;
+  }
+  if (n >= 1000) {
+    str += amountToWords(Math.floor(n / 1000)) + ' thousand ';
+    n %= 1000;
+  }
+  if (n >= 100) {
+    str += amountToWords(Math.floor(n / 100)) + ' hundred ';
+    n %= 100;
+  }
+  if (n > 0) {
+    if (str !== '') str += 'and ';
+    if (n < 20) {
+      str += a[n];
+    } else {
+      str += b[Math.floor(n / 10)] + (n % 10 !== 0 ? '-' + a[n % 10] : '');
+    }
+  }
+
+  return str.trim();
+}
+
 export default function FeesPage() {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
@@ -70,51 +109,37 @@ export default function FeesPage() {
     if (!payingItem) return;
     setProcessing(true);
     
-    // Simulate payment transaction
-    setTimeout(async () => {
-      try {
-        const token = localStorage.getItem('token');
-        // We mock updating the backend by adding a payment record and marking ledger item paid.
-        // For the client side prototype, we'll simulate the update on local state & trigger data refresh!
-        
-        // Simulating backend logic:
-        const updatedLedger = data.ledger.map((item: any) => {
-          if (item.id === payingItem.id) {
-            return { ...item, paid: item.total, due: 0 };
-          }
-          return item;
-        });
-
-        const newPayment = {
-          id: "p_" + Date.now(),
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/fees/pay`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ledgerId: payingItem.id,
           amount: payingItem.due,
-          method: paymentMethod,
-          paidAt: new Date().toISOString(),
-          status: 'success' as const,
-          particular: payingItem.particular
-        };
+          method: paymentMethod
+        })
+      });
 
-        const updatedPayments = [newPayment, ...data.payments];
-        const newTotalPaid = data.totalPaid + payingItem.due;
-        const newTotalDue = data.totalDue - payingItem.due;
-
-        setData({
-          ...data,
-          ledger: updatedLedger,
-          payments: updatedPayments,
-          totalPaid: newTotalPaid,
-          totalDue: newTotalDue
-        });
-
-        setSuccessMsg(`Payment of ${formatCurrency(payingItem.due)} for ${payingItem.particular} successful!`);
-        setPayingItem(null);
-        setTimeout(() => setSuccessMsg(''), 4000);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setProcessing(false);
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Payment failed');
       }
-    }, 2000);
+
+      setSuccessMsg(`Payment of ${formatCurrency(payingItem.due)} for ${payingItem.particular} successful!`);
+      setPayingItem(null);
+      setTimeout(() => setSuccessMsg(''), 4000);
+      
+      // Refresh the ledger data from the backend
+      fetchFees();
+    } catch (e: any) {
+      alert(e.message || 'Payment processing failed');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleDownloadReceipt = (id: string) => {
@@ -213,6 +238,14 @@ export default function FeesPage() {
                     alt="Payment QR Code" 
                     className="max-h-full max-w-full object-contain"
                   />
+                </div>
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <span className="text-sm font-extrabold text-foreground">
+                    Amount: {formatCurrency(payingItem.due)}
+                  </span>
+                  <span className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
+                    ({amountToWords(payingItem.due)} Rupees Only)
+                  </span>
                 </div>
                 <span className="text-[10px] text-muted-foreground font-semibold">UPI ID: piet.attendex@ybl</span>
               </div>

@@ -193,6 +193,27 @@ export class Database {
     return this.data.fees;
   }
 
+  public payFee(id: string, amount: number, method: string): boolean {
+    const feeItem = this.data.fees.ledger.find(item => item.id === id);
+    if (!feeItem) return false;
+
+    feeItem.paid += amount;
+    feeItem.due = Math.max(0, feeItem.due - amount);
+
+    const newPayment = {
+      id: "p_" + Date.now(),
+      amount: amount,
+      method: method,
+      paidAt: new Date().toISOString(),
+      status: 'success' as const,
+      particular: feeItem.particular
+    };
+
+    this.data.fees.payments.unshift(newPayment);
+    this.save();
+    return true;
+  }
+
   public getResults(): ResultRecord[] {
     return this.data.results;
   }

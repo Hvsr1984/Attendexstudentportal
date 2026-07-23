@@ -225,6 +225,22 @@ app.get('/api/fees', requireRole(['student']), (req: AuthenticatedRequest, res) 
   });
 });
 
+app.post('/api/fees/pay', requireRole(['student']), (req: AuthenticatedRequest, res) => {
+  const { ledgerId, amount, method } = req.body;
+
+  if (!ledgerId || !amount || !method) {
+    return res.status(400).json({ error: 'Ledger ID, amount, and payment method are required' });
+  }
+
+  const success = db.payFee(ledgerId, Number(amount), method);
+
+  if (!success) {
+    return res.status(404).json({ error: 'Fee ledger item not found' });
+  }
+
+  res.json({ success: true });
+});
+
 // Results Ledger
 app.get('/api/results', requireRole(['student']), (req, res) => {
   res.json(db.getResults());
