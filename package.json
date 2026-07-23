@@ -1,0 +1,15 @@
+{
+  "name": "attendex-monorepo",
+  "private": true,
+  "workspaces": [
+    "student-portal",
+    "backend",
+    "shared"
+  ],
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}

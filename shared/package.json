@@ -1,0 +1,14 @@
+{
+  "name": "attendex-shared",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^1.26.0"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  }
+}
