@@ -175,6 +175,13 @@
         "total": 100,
         "paid": 0,
         "due": 100
+      },
+      {
+        "id": "f8",
+        "particular": "Transport Fee",
+        "total": 500,
+        "paid": 0,
+        "due": 500
       }
     ],
     "payments": [
