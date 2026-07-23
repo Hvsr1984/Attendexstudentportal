@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Badge, Skeleton, Dialog, Input, COMPLAINT_CATEGORIES, COLOR_TOKENS, formatDate } from '@shared';
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://attendex-backend-api.vercel.app/api";
 
 export default function ComplaintsPage() {
   const router = useRouter();

@@ -3,7 +3,7 @@ import * as path from 'path';
 import { 
   Student, Subject, TimetableSlot, FeeLedgerEntry, 
   PaymentRecord, ResultRecord, ComplaintRecord, NoticeRecord 
-} from '../../shared/src/types';
+} from './shared-types';
 
 interface DatabaseSchema {
   students: Student[];

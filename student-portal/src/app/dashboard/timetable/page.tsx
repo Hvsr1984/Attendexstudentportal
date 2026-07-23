@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Skeleton } from '@shared';
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://attendex-backend-api.vercel.app/api";
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 export default function TimetablePage() {

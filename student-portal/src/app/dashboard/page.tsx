@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Skeleton, getAttendanceTailwindClass, formatCurrency, formatDate } from '@shared';
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://attendex-backend-api.vercel.app/api";
 
 export default function DashboardHome() {
   const router = useRouter();

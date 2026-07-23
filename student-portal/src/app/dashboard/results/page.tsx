@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { Card, Button, Badge, Skeleton } from '@shared';
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://attendex-backend-api.vercel.app/api";
 
 export default function ResultsPage() {
   const router = useRouter();

@@ -3,7 +3,7 @@ import cors from 'cors';
 import * as dotenv from 'dotenv';
 import { db } from './db';
 import { authenticateToken, requireRole, generateToken, AuthenticatedRequest } from './middleware/auth';
-import { User, ComplaintRecord, NoticeRecord } from '../../shared/src/types';
+import { User, ComplaintRecord, NoticeRecord } from './shared-types';
 
 dotenv.config();
 
@@ -317,6 +317,10 @@ app.post('/api/admin/notices', requireRole(['admin']), (req, res) => {
 });
 
 // Start listening
-app.listen(PORT, () => {
-  console.log(`ATTENDEX Backend running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`ATTENDEX Backend running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;

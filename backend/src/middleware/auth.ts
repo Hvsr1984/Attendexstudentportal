@@ -1,6 +1,6 @@
 import { Response, NextFunction, Request } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { User, UserRole } from '../../../shared/src/types';
+import { User, UserRole } from '../shared-types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'attendex_super_secret_jwt_key';
 
