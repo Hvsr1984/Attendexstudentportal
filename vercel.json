@@ -1,6 +1,12 @@
 {
-  "buildCommand": "npm run build --workspace=student-portal",
-  "outputDirectory": "student-portal/.next",
-  "installCommand": "npm install && npm install --no-save @tailwindcss/oxide lightningcss",
-  "framework": "nextjs"
+  "version": 2,
+  "services": {
+    "frontend": {
+      "root": "student-portal",
+      "buildCommand": "npm run build --workspace=student-portal",
+      "outputDirectory": "student-portal/.next",
+      "installCommand": "npm install && npm install --no-save @tailwindcss/oxide lightningcss",
+      "framework": "nextjs"
+    }
+  }
 }
