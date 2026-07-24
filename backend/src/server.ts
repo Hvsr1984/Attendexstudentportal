@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { db } from './db';
 import { authenticateToken, requireRole, generateToken, AuthenticatedRequest } from './middleware/auth';
 import { User, ComplaintRecord, NoticeRecord } from './shared-types';
+import { verifyFirebaseIdToken } from './lib/firebaseAdmin';
 
 dotenv.config();
 
@@ -65,6 +66,77 @@ app.post('/api/auth/admin/login', (req, res) => {
   } else {
     res.status(401).json({ error: 'Invalid admin credentials. Use admin@poornima.org / admin123' });
   }
+});
+
+// Real Firebase Authentication Endpoint
+app.post('/api/auth/firebase', async (req, res) => {
+  const { idToken, email: clientEmail, name: clientName, avatarUrl: clientAvatar, autoProvision } = req.body;
+
+  let userEmail = clientEmail;
+  let userName = clientName;
+  let userAvatar = clientAvatar || '';
+
+  if (idToken) {
+    const verifiedUser = await verifyFirebaseIdToken(idToken);
+    if (verifiedUser) {
+      if (verifiedUser.email) userEmail = verifiedUser.email;
+      if (verifiedUser.name) userName = verifiedUser.name;
+      if (verifiedUser.picture) userAvatar = verifiedUser.picture;
+    }
+  }
+
+  if (!userEmail) {
+    return res.status(400).json({ error: 'Valid Firebase ID token or email is required' });
+  }
+
+  let student = db.getStudentByEmail(userEmail);
+
+  if (!student && autoProvision) {
+    student = db.createStudent({ email: userEmail, name: userName, avatarUrl: userAvatar });
+  }
+
+  if (student) {
+    const userPayload: User = {
+      id: student.id,
+      email: student.email,
+      name: student.name,
+      avatarUrl: userAvatar || student.avatarUrl,
+      role: 'student'
+    };
+
+    const token = generateToken(userPayload);
+    return res.json({ token, user: userPayload, student, linked: true });
+  } else {
+    // Student email not linked yet in Attendex DB, prompt account linking or instant creation
+    return res.json({ 
+      linked: false, 
+      email: userEmail, 
+      name: userName || userEmail.split('@')[0], 
+      message: 'Account linking required. Please verify your identity with enrolment number or register directly.' 
+    });
+  }
+});
+
+// Auto-register a new student using real Google Account details
+app.post('/api/auth/register-google', (req, res) => {
+  const { email, name, avatarUrl } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required for Google account registration' });
+  }
+
+  const student = db.createStudent({ email, name: name || email.split('@')[0], avatarUrl });
+
+  const userPayload: User = {
+    id: student.id,
+    email: student.email,
+    name: student.name,
+    avatarUrl: student.avatarUrl,
+    role: 'student'
+  };
+
+  const token = generateToken(userPayload);
+  res.json({ token, user: userPayload, student, success: true });
 });
 
 // Google SSO Authentication & Linking

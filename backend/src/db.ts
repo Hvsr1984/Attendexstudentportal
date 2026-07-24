@@ -250,6 +250,28 @@ export class Database {
     }
     return undefined;
   }
+
+  public createStudent(data: { email: string; name: string; avatarUrl?: string }): Student {
+    const existing = this.getStudentByEmail(data.email);
+    if (existing) return existing;
+
+    const enrolmentNo = `PIET25CS${Math.floor(100 + Math.random() * 900)}`;
+    const newStudent: Student = {
+      id: `student_${Date.now()}`,
+      enrolmentNo,
+      name: data.name || data.email.split('@')[0],
+      email: data.email,
+      phone: '+91 9876543210',
+      dob: '01 January 2005',
+      address: 'Jaipur, Rajasthan',
+      program: 'B.Tech CSE - 3rd Year',
+      semester: '3rd Sem',
+      avatarUrl: data.avatarUrl || ''
+    };
+    this.data.students.push(newStudent);
+    this.save();
+    return newStudent;
+  }
 }
 
 export const db = new Database();
